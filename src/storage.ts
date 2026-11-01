@@ -54,7 +54,7 @@ export function loadDifficulty(): Difficulty {
 }
 
 const MOTION_KEY = "ba26-motion";
-export const loadMotionChoice = () => read(MOTION_KEY) === true;
+export const loadMotionOff = () => read(MOTION_KEY) === false;
 export const saveMotionChoice = (allowed: boolean) => write(MOTION_KEY, allowed);
 
 export function clearProgress(): void {

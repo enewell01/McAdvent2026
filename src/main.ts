@@ -10,7 +10,6 @@ import {
   loadDone,
   loadOpened,
   loadPeek,
-  loadMotionChoice,
   saveDifficulty,
   saveDone,
   saveMotionChoice,
@@ -319,7 +318,7 @@ if (systemReducesMotion()) {
   motionButton.hidden = false;
   motionButton.textContent = motionOff() ? "Turn on snow and animations" : "Turn off snow and animations";
   motionButton.addEventListener("click", () => {
-    saveMotionChoice(!loadMotionChoice());
+    saveMotionChoice(motionOff());
     location.reload();
   });
 }

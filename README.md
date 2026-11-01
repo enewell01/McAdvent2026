@@ -75,9 +75,8 @@ opens more doors.
 
 ## Animations
 
-Snow, twinkling lights and the sleigh follow the device's reduced-motion setting.
-People with it on see a still page, plus a "Turn on snow and animations" button.
-On Windows the setting is Accessibility → Visual effects → Animation effects.
+Snow, twinkling lights and the sleigh are on by default for everyone. Devices set
+to reduce motion also get a "Turn off snow and animations" button.
 
 ## Images
 

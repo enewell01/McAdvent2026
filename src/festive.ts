@@ -1,12 +1,12 @@
 // Animated touches: the living hero scene and the bursts inside the door dialog.
 import type { SceneAnchors } from "./pixels";
-import { loadMotionChoice } from "./storage";
+import { loadMotionOff } from "./storage";
 
 export const systemReducesMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// Animations follow the device's reduced-motion setting unless the viewer has
-// chosen to turn them on with the button in the hero.
-export const motionOff = () => systemReducesMotion() && !loadMotionChoice();
+// Animations are on for everyone by default. Devices set to reduce motion get a
+// button in the hero to turn them off.
+export const motionOff = loadMotionOff;
 
 const FRAME_MS = 125; // The hero steps at 8fps to stay in keeping with the pixel art.
 const SLEIGH_EVERY = 280; // Frames between flights, about 35 seconds.

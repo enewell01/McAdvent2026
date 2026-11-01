@@ -375,7 +375,7 @@ dialog::backdrop { background: rgba(5, 8, 14, .74); }
   .num { font-size: 18px; }
 }
 
-/* Set from main.ts: follows prefers-reduced-motion unless the viewer opts back in. */
+/* Set from main.ts when the viewer turns animations off. */
 .still .door.today, .still .door.rattle, .still .xp-level.level-up, .still dialog[open], .still .lights::after { animation: none; }
 .still .door, .still .xp-fill { transition: none; }
 .still .door:hover, .still .door:focus-visible { transform: none; }
