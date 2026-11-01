@@ -1,13 +1,19 @@
 import "./styles.css";
-import { CHALLENGES, DIFFICULTY_LABELS, TYPE_LABELS, type ChallengeType } from "./challenges";
-import { drawScene, installRockLayers, skinFor } from "./pixels";
+import { DAYS, DIFFICULTIES, TYPE_LABELS, type ChallengeType, type Difficulty } from "./challenges";
+import { celebrate, motionOff, startSceneFx, systemReducesMotion, updateSceneFx } from "./festive";
+import { drawScene, installFestiveArt, installRockLayers, skinFor } from "./pixels";
 import { startSnow } from "./snow";
 import {
   clearProgress,
+  doneKey,
+  loadDifficulty,
   loadDone,
   loadOpened,
   loadPeek,
+  loadMotionChoice,
+  saveDifficulty,
   saveDone,
+  saveMotionChoice,
   saveOpened,
   savePeek,
 } from "./storage";
@@ -17,9 +23,10 @@ import {
 const PEEK_ENABLED = false;
 
 const YEAR = 2026;
-const DOOR_COUNT = CHALLENGES.length;
+const DOOR_COUNT = DAYS.length;
+const SERVER_ADDRESS = "AdventCraft.ooguy.com";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const dates = CHALLENGES.map((_, i) => new Date(YEAR, 10, 1 + i));
+const dates = DAYS.map((_, i) => new Date(YEAR, 10, 1 + i));
 
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -28,9 +35,11 @@ const doneButton = el<HTMLButtonElement>("dialog-done");
 const shareButton = el<HTMLButtonElement>("share");
 const peekInput = el<HTMLInputElement>("peek");
 const toastEl = el("toast");
+const burst = el<HTMLCanvasElement>("burst");
 
 let opened = loadOpened(DOOR_COUNT);
-let done = loadDone(DOOR_COUNT);
+let done = loadDone();
+let difficulty = loadDifficulty();
 let peek = PEEK_ENABLED && loadPeek();
 let currentDoor = -1;
 
@@ -43,6 +52,8 @@ function todayIndex(): number {
 }
 
 const isLocked = (door: number) => door > todayIndex() && !peek;
+// A door counts as complete once any of its three challenges is done.
+const isDoorDone = (door: number) => DIFFICULTIES.some((level) => done.has(doneKey(door, level)));
 const shortDate = (door: number) =>
   dates[door].toLocaleDateString("en-CA", { month: "long", day: "numeric" });
 
@@ -55,12 +66,12 @@ function toast(message: string) {
 }
 
 // Doors are built once and updated in place, so keyboard focus survives updates.
-const doors = CHALLENGES.map((challenge, i) => {
+const doors = DAYS.map((_, i) => {
   const date = dates[i];
   const button = document.createElement("button");
   button.type = "button";
   button.className = "door";
-  button.innerHTML = `<span class="num">${date.getDate()}</span><span class="dow">${WEEKDAYS[date.getDay()]}</span>`;
+  button.innerHTML = `<span class="num">${date.getDate()}</span><span class="dow">${WEEKDAYS[date.getDay()]}</span><span class="pips"><i></i><i></i><i></i></span>`;
   button.addEventListener("click", () => {
     if (isLocked(i)) {
       button.classList.remove("rattle");
@@ -72,27 +83,31 @@ const doors = CHALLENGES.map((challenge, i) => {
     }
   });
   el(date.getMonth() === 10 ? "november" : "december").append(button);
-  return { button, challenge };
+  return button;
 });
-doors[DOOR_COUNT - 1].button.classList.add("big-day");
+doors[DOOR_COUNT - 1].classList.add("big-day");
 
 function paint() {
   const today = todayIndex();
-  doors.forEach(({ button, challenge }, i) => {
+  doors.forEach((button, i) => {
     const locked = isLocked(i);
+    const doorDone = isDoorDone(i);
     button.classList.toggle("today", i === today);
     button.classList.toggle("locked", locked);
     button.classList.toggle("opened", opened.has(i));
-    button.classList.toggle("done", done.has(i));
-    button.style.setProperty("--skin", skinFor(locked ? "locked" : challenge.type, i));
+    button.classList.toggle("done", doorDone);
+    DIFFICULTIES.forEach((level, pip) => {
+      button.querySelectorAll("i")[pip].classList.toggle("earned", done.has(doneKey(i, level)));
+    });
+    button.style.setProperty("--skin", skinFor(locked ? "locked" : DAYS[i].type, i));
     button.setAttribute("aria-disabled", String(locked));
     button.setAttribute(
       "aria-label",
-      shortDate(i) + (locked ? ", locked" : `: ${challenge.title}`) + (done.has(i) ? ", completed" : ""),
+      shortDate(i) + (locked ? ", locked" : `: ${DAYS[i][difficulty].title}`) + (doorDone ? ", completed" : ""),
     );
   });
 
-  const level = done.size;
+  const level = DAYS.filter((_, i) => isDoorDone(i)).length;
   el("level").textContent = String(level);
   el("xp-fill").style.width = `${(level / DOOR_COUNT) * 100}%`;
   el("xp-bar").setAttribute("aria-valuenow", String(level));
@@ -113,12 +128,15 @@ function paintCountdown() {
     text = `${today < 0 ? "First" : "Next"} door opens in ${time}`;
   }
   el("next-door").textContent = text;
+
+  const sleeps = DOOR_COUNT - 1 - today;
+  el("sleeps").textContent = sleeps > 0 ? `${sleeps} ${sleeps === 1 ? "sleep" : "sleeps"} until Christmas` : "";
 }
 
 function openDoor(door: number) {
   if (isLocked(door)) return;
   currentDoor = door;
-  const { challenge } = doors[door];
+  const firstOpen = !opened.has(door);
   opened.add(door);
   saveOpened(opened);
 
@@ -127,33 +145,54 @@ function openDoor(door: number) {
     month: "long",
     day: "numeric",
   });
-  el("dialog-type").textContent = TYPE_LABELS[challenge.type];
-  const difficulty = el("dialog-difficulty");
-  difficulty.textContent = DIFFICULTY_LABELS[challenge.difficulty];
-  difficulty.dataset.level = String(challenge.difficulty);
-  el("dialog-title").textContent = challenge.title;
-  el("dialog-body").textContent = challenge.challenge;
-  el("dialog-tip").textContent = `Tip: ${challenge.tip}`;
-  syncDoneButton();
+  el("dialog-type").textContent = TYPE_LABELS[DAYS[door].type];
+  fillChallenge();
 
   history.replaceState(null, "", `#day-${door + 1}`);
   if (!dialog.open) dialog.showModal();
+  if (firstOpen) celebrate(burst, "snow");
   paint();
 }
 
+function fillChallenge() {
+  const { title, challenge, tip } = DAYS[currentDoor][difficulty];
+  el("dialog-title").textContent = title;
+  el("dialog-body").textContent = challenge;
+  el("dialog-tip").textContent = `Tip: ${tip}`;
+  syncDoneButton();
+}
+
 function syncDoneButton() {
-  doneButton.textContent = done.has(currentDoor) ? "Mark not done" : "Mark complete";
+  doneButton.textContent = done.has(doneKey(currentDoor, difficulty)) ? "Mark not done" : "Mark complete";
+}
+
+// The page and the dialog each have a difficulty switch, and they stay in step.
+const difficultyInputs = [...document.querySelectorAll<HTMLInputElement>(".difficulty input")];
+
+function setDifficulty(next: Difficulty) {
+  difficulty = next;
+  saveDifficulty(next);
+  for (const input of difficultyInputs) input.checked = input.value === next;
+  if (dialog.open) fillChallenge();
+  paint();
+}
+
+for (const input of difficultyInputs) {
+  input.checked = input.value === difficulty;
+  input.addEventListener("change", () => setDifficulty(input.value as Difficulty));
 }
 
 doneButton.addEventListener("click", () => {
-  if (done.has(currentDoor)) {
-    done.delete(currentDoor);
+  const key = doneKey(currentDoor, difficulty);
+  if (done.has(key)) {
+    done.delete(key);
   } else {
-    done.add(currentDoor);
+    done.add(key);
     const level = el("level");
     level.classList.remove("level-up");
     void level.offsetWidth;
     level.classList.add("level-up");
+    celebrate(burst, "confetti");
   }
   saveDone(done);
   syncDoneButton();
@@ -204,13 +243,17 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
+el("copy-server").addEventListener("click", async () => {
+  toast((await copyText(SERVER_ADDRESS)) ? "Copied" : `Copy failed. The address is ${SERVER_ADDRESS}`);
+});
+
 const shareDialog = el<HTMLDialogElement>("share-dialog");
 const shareText = el<HTMLTextAreaElement>("share-text");
 
 shareButton.addEventListener("click", async () => {
   const today = Math.min(todayIndex(), DOOR_COUNT - 1);
   if (today < 0) return;
-  const { title, challenge } = CHALLENGES[today];
+  const { title, challenge } = DAYS[today][difficulty];
   const text = `Day ${today + 1}: ${title} – ${challenge}\n${location.origin}${location.pathname}`;
   if (await copyText(text)) {
     toast("Copied");
@@ -270,25 +313,40 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden) checkDay();
 });
 
+document.documentElement.classList.toggle("still", motionOff());
+if (systemReducesMotion()) {
+  const motionButton = el<HTMLButtonElement>("motion");
+  motionButton.hidden = false;
+  motionButton.textContent = motionOff() ? "Turn on snow and animations" : "Turn off snow and animations";
+  motionButton.addEventListener("click", () => {
+    saveMotionChoice(!loadMotionChoice());
+    location.reload();
+  });
+}
+
 const LEGEND: ChallengeType[] = ["build", "survive", "explore", "ice", "redstone", "nether", "festive"];
 el("legend").innerHTML = LEGEND.map(
   (type) => `<li><i class="swatch" style='background-image:${skinFor(type)}'></i>${TYPE_LABELS[type]}</li>`,
 ).join("");
 
 installRockLayers(document.documentElement);
+installFestiveArt(document.documentElement);
 
 const scene = el<HTMLCanvasElement>("scene");
+const sceneFx = el<HTMLCanvasElement>("scene-fx");
 let sceneWidth = 0;
 function redrawScene() {
   // Mobile browsers fire resize when the address bar hides; only width matters here.
   if (scene.clientWidth === sceneWidth) return;
   sceneWidth = scene.clientWidth;
-  drawScene(scene);
+  const anchors = drawScene(scene);
+  updateSceneFx(sceneFx, scene.width, scene.height, anchors);
 }
 addEventListener("resize", redrawScene);
 redrawScene();
 
-startSnow(el<HTMLCanvasElement>("snow"));
+startSceneFx(sceneFx);
+startSnow(el<HTMLCanvasElement>("snow"), el("xp-bar"), todayIndex() === DOOR_COUNT - 1);
 paint();
 paintCountdown();
 openFromHash();

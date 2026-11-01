@@ -30,8 +30,15 @@
   <body>
     <canvas id="snow" aria-hidden="true"></canvas>
 
+    <section class="join" aria-label="Join the server">
+      <p>Join the server at <strong>AdventCraft.ooguy.com</strong></p>
+      <button class="btn small" id="copy-server" type="button">Copy address</button>
+    </section>
+
     <header class="hero">
       <canvas id="scene" aria-hidden="true"></canvas>
+      <canvas id="scene-fx" aria-hidden="true"></canvas>
+      <button class="btn motion" id="motion" type="button" hidden></button>
       <div class="hero-text">
         <h1>Blocky Advent 2026</h1>
         <p class="lede">One Christmas challenge a day for your Minecraft world. Today's door glows gold. Open it, play it, then mark it complete to earn a level.</p>
@@ -39,13 +46,21 @@
           <button class="btn" id="share" type="button">Share today's challenge</button>
           <p class="next-door" id="next-door"></p>
         </div>
+        <p class="sleeps" id="sleeps"></p>
         <label class="toggle" id="peek-toggle" for="peek" hidden><input type="checkbox" id="peek" /> Peek at future doors</label>
       </div>
     </header>
 
     <main>
       <section class="stratum dirt" aria-labelledby="november-heading">
+        <div class="lights" aria-hidden="true"></div>
         <div class="wrap">
+          <fieldset class="difficulty">
+            <legend>Difficulty</legend>
+            <label data-level="easy"><input type="radio" name="difficulty" value="easy" /><span>Easy</span></label>
+            <label data-level="medium"><input type="radio" name="difficulty" value="medium" /><span>Medium</span></label>
+            <label data-level="hard"><input type="radio" name="difficulty" value="hard" /><span>Hard</span></label>
+          </fieldset>
           <h2 id="november-heading">November</h2>
           <div class="grid" id="november"></div>
           <ul class="legend" id="legend" aria-label="Challenge types"></ul>
@@ -53,6 +68,7 @@
       </section>
 
       <section class="stratum stone" aria-labelledby="december-heading">
+        <div class="lights" aria-hidden="true"></div>
         <div class="wrap">
           <h2 id="december-heading">December</h2>
           <div class="grid" id="december"></div>
@@ -87,10 +103,17 @@
 
     <dialog id="door-dialog" aria-labelledby="dialog-title">
       <div class="panel">
+        <canvas id="burst" aria-hidden="true"></canvas>
         <div class="panel-top">
           <span class="panel-date" id="dialog-date"></span>
-          <span class="chips"><span class="chip" id="dialog-type"></span><span class="chip diff" id="dialog-difficulty"></span></span>
+          <span class="chips"><span class="chip" id="dialog-type"></span></span>
         </div>
+        <fieldset class="difficulty">
+          <legend>Difficulty</legend>
+          <label data-level="easy"><input type="radio" name="dialog-difficulty" value="easy" /><span>Easy</span></label>
+          <label data-level="medium"><input type="radio" name="dialog-difficulty" value="medium" /><span>Medium</span></label>
+          <label data-level="hard"><input type="radio" name="dialog-difficulty" value="hard" /><span>Hard</span></label>
+        </fieldset>
         <h3 id="dialog-title"></h3>
         <p id="dialog-body"></p>
         <p class="tip" id="dialog-tip"></p>

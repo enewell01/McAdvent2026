@@ -25,7 +25,7 @@ body {
   overflow-x: hidden;
 }
 
-#snow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+#snow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 6; }
 
 .wrap {
   max-width: 1040px;
@@ -33,9 +33,29 @@ body {
   padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
 }
 
+/* Join sign */
+.join {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 8px 16px;
+  background: #4a3220;
+  border-bottom: 4px solid #2a1b10;
+  color: var(--snow);
+  font-size: 24px;
+  text-align: center;
+}
+.join p { margin: 0; }
+.join strong { font-weight: 400; color: var(--gold); }
+.btn.small { padding: 2px 10px; font-size: 18px; }
+
 /* Hero */
 .hero { position: relative; background: var(--night); overflow: hidden; }
-#scene { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+#scene, #scene-fx { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .hero-text {
   position: relative;
   max-width: 1040px;
@@ -54,19 +74,21 @@ h1 {
   max-width: 12em;
   margin: 0;
   color: var(--snow);
-  text-shadow: 4px 4px 0 var(--holly), 8px 8px 0 var(--ink);
+  text-shadow: 4px 4px 0 var(--holly), 8px 8px 0 #1f6b3a;
 }
 .lede { margin: 0; max-width: 54ch; color: var(--snow); text-shadow: 2px 2px 0 var(--ink); }
+.btn.motion { position: absolute; z-index: 1; top: 6px; right: max(6px, env(safe-area-inset-right, 0px)); padding: 0 8px; min-height: 24px; font-size: 16px; box-shadow: 0 0 0 2px var(--ink); text-shadow: none; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
 .next-door { margin: 0; color: var(--gold); text-shadow: 2px 2px 0 var(--ink); font-variant-numeric: tabular-nums; }
+.sleeps { margin: 0; font-family: var(--display); font-size: clamp(11px, 1.6vw, 14px); line-height: 1.5; color: var(--snow); text-shadow: 2px 2px 0 var(--holly); }
 .toggle { display: inline-flex; gap: 10px; align-items: center; cursor: pointer; }
 .toggle input { width: 20px; height: 20px; accent-color: var(--xp); }
 
 /* Rock layers */
-.stratum { position: relative; padding-block: 44px 40px; background-size: 128px 128px; image-rendering: pixelated; }
+.stratum { position: relative; padding-block: 64px 40px; background-size: 128px 128px; image-rendering: pixelated; }
 .dirt { background-image: var(--rock-dirt); }
 .stone { background-image: var(--rock-stone); }
-.deep { background-image: var(--rock-deep); padding-bottom: 104px; }
+.deep { background-image: var(--rock-deep); padding-block: 44px 104px; }
 .stone::before, .deep::before {
   content: "";
   position: absolute;
@@ -78,7 +100,24 @@ h1 {
 .stone::before { background-image: var(--edge-dirt); }
 .deep::before { background-image: var(--edge-stone); }
 
+/* Strings of lights hang along the top of each layer. The second frame blinks over the first. */
+.lights, .lights::after {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 48px;
+  background-size: 160px 48px;
+  background-repeat: repeat-x;
+  background-image: var(--lights-a);
+  image-rendering: pixelated;
+}
+.lights::after { content: ""; background-image: var(--lights-b); animation: blink 1.6s steps(1) infinite; }
+.lights { z-index: 1; pointer-events: none; }
+@keyframes blink { 50% { opacity: 0; } }
+
 h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-family: var(--display);
   font-weight: 400;
   font-size: 16px;
@@ -86,6 +125,29 @@ h2 {
   color: var(--gold);
   text-shadow: 2px 2px 0 var(--ink);
 }
+
+/* Difficulty switch */
+.difficulty { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 22px; padding: 0; border: 0; min-inline-size: 0; }
+.difficulty legend { float: left; margin-right: 6px; padding: 0; font-size: 20px; }
+.difficulty label { cursor: pointer; }
+.difficulty input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.difficulty span {
+  display: block;
+  padding: 4px 14px;
+  font-size: 20px;
+  color: var(--snow);
+  background: #4d4d4d;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .4), inset 2px 2px 0 rgba(255, 255, 255, .15), 0 0 0 2px var(--ink);
+}
+.difficulty input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 3px; }
+[data-level="easy"] input:checked + span { background: #2f6420; }
+[data-level="medium"] input:checked + span { background: #8a5a00; }
+[data-level="hard"] input:checked + span { background: #96241f; }
+.difficulty input:checked + span { box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .4), inset -2px -2px 0 rgba(255, 255, 255, .15), 0 0 0 2px var(--snow); }
+.panel .difficulty { margin: 0; }
+.panel .difficulty input:checked + span { box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .4), 0 0 0 2px var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
+
+h2::before { content: ""; width: 33px; height: 15px; background: var(--holly-sprig) center / 100% 100%; image-rendering: pixelated; }
 
 .grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 10px; }
 
@@ -121,6 +183,14 @@ h2 {
 }
 .dow { position: absolute; left: 5px; bottom: 5px; padding-inline: 3px; font-size: 16px; line-height: 1; background: rgba(10, 13, 18, .78); }
 
+/* One pip for each difficulty completed on this door */
+.pips { position: absolute; right: 5px; bottom: 5px; display: flex; gap: 2px; }
+.pips i { width: 6px; height: 6px; display: none; box-shadow: 0 0 0 1px var(--ink); }
+.pips i.earned { display: block; }
+.pips i:nth-child(1) { background: var(--xp); }
+.pips i:nth-child(2) { background: var(--gold); }
+.pips i:nth-child(3) { background: #ff4b3e; }
+
 .door.today {
   outline: 4px solid var(--gold);
   outline-offset: 2px;
@@ -129,6 +199,18 @@ h2 {
 }
 @keyframes glow {
   50% { outline-color: var(--snow); box-shadow: inset -5px -5px 0 rgba(0, 0, 0, .35), inset 5px 5px 0 rgba(255, 255, 255, .18), 0 0 26px 8px rgba(242, 193, 78, .6); }
+}
+
+.door.today::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 44px;
+  height: 32px;
+  transform: translateX(-50%);
+  background: var(--bow) center / 100% 100%;
+  image-rendering: pixelated;
 }
 
 .door.locked { cursor: not-allowed; color: #aab2c0; box-shadow: inset -5px -5px 0 rgba(0, 0, 0, .35), inset 5px 5px 0 rgba(255, 255, 255, .06), 0 4px 0 var(--ink); }
@@ -185,7 +267,7 @@ h2 {
 .hud {
   position: fixed;
   inset: auto 0 0;
-  z-index: 6;
+  z-index: 5;
   padding: 6px 16px calc(8px + env(safe-area-inset-bottom, 0px));
   pointer-events: none;
   background: linear-gradient(transparent, rgba(10, 13, 18, .86) 42%);
@@ -236,7 +318,9 @@ dialog {
 dialog[open] { animation: pop-open .16s steps(3); }
 @keyframes pop-open { from { transform: scale(.82); } }
 dialog::backdrop { background: rgba(5, 8, 14, .74); }
-.panel { padding: 26px 24px 22px; display: flex; flex-direction: column; gap: 14px; }
+.panel { position: relative; padding: 36px 24px 22px; display: flex; flex-direction: column; gap: 14px; }
+.panel::before { content: ""; position: absolute; inset: 0 0 auto; height: 24px; background: var(--edge-snow) 0 0 / 128px 24px; image-rendering: pixelated; }
+#burst { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 .panel-top { display: flex; justify-content: space-between; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
 .panel-date { font-family: var(--display); font-size: 11px; line-height: 1.5; color: #333; }
 .panel h3 { font-family: var(--display); font-weight: 400; font-size: clamp(15px, 3.6vw, 19px); line-height: 1.45; margin: 0; text-wrap: balance; }
@@ -245,9 +329,6 @@ dialog::backdrop { background: rgba(5, 8, 14, .74); }
 .panel textarea { width: 100%; font: inherit; font-size: 20px; padding: 8px; background: #fff; color: var(--ink); border: 2px solid var(--ink); resize: vertical; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { font-size: 18px; padding: 2px 10px; background: #4d4d4d; color: var(--snow); }
-.chip.diff[data-level="1"] { background: #2f6420; }
-.chip.diff[data-level="2"] { background: #8a5a00; }
-.chip.diff[data-level="3"] { background: #96241f; }
 .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
 
 /* Footer */
@@ -286,7 +367,7 @@ dialog::backdrop { background: rgba(5, 8, 14, .74); }
 
 @media (max-width: 480px) {
   body { font-size: 20px; }
-  .hero-text { padding-top: 32px; }
+  .hero-text { padding-top: 32px; padding-bottom: 200px; }
   .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .door.big-day { grid-column: 1 / -1; aspect-ratio: 4 / 1; }
   .door.locked::before, .door.locked::after { display: block; }
@@ -294,8 +375,7 @@ dialog::backdrop { background: rgba(5, 8, 14, .74); }
   .num { font-size: 18px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .door.today, .door.rattle, .xp-level.level-up, dialog[open] { animation: none; }
-  .door, .xp-fill { transition: none; }
-  .door:hover, .door:focus-visible { transform: none; }
-}
+/* Set from main.ts: follows prefers-reduced-motion unless the viewer opts back in. */
+.still .door.today, .still .door.rattle, .still .xp-level.level-up, .still dialog[open], .still .lights::after { animation: none; }
+.still .door, .still .xp-fill { transition: none; }
+.still .door:hover, .still .door:focus-visible { transform: none; }

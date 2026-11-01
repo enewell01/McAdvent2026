@@ -1,7 +1,10 @@
 // Every access is wrapped: storage can throw when blocked or in a private window,
 // and the calendar still has to work for that visit.
 
-const KEYS = { opened: "ba26-opened", done: "ba26-done", peek: "ba26-peek" } as const;
+import { DIFFICULTIES, type Difficulty } from "./challenges";
+
+// "ba26-done2" replaced "ba26-done" when each door gained three difficulties.
+const KEYS = { opened: "ba26-opened", done: "ba26-done2", peek: "ba26-peek" } as const;
 
 function read(key: string): unknown {
   try {
@@ -27,11 +30,32 @@ function readDoors(key: string, doorCount: number): Set<number> {
 }
 
 export const loadOpened = (doorCount: number) => readDoors(KEYS.opened, doorCount);
-export const loadDone = (doorCount: number) => readDoors(KEYS.done, doorCount);
+
+// Completed challenges, stored as "door:difficulty", for example "11:hard".
+export const doneKey = (door: number, difficulty: Difficulty) => `${door}:${difficulty}`;
+
+export function loadDone(): Set<string> {
+  const value = read(KEYS.done);
+  if (!Array.isArray(value)) return new Set();
+  return new Set(value.filter((key) => typeof key === "string" && /^\d+:(easy|medium|hard)$/.test(key)));
+}
+
 export const saveOpened = (doors: Set<number>) => write(KEYS.opened, [...doors]);
-export const saveDone = (doors: Set<number>) => write(KEYS.done, [...doors]);
+export const saveDone = (keys: Set<string>) => write(KEYS.done, [...keys]);
 export const loadPeek = () => read(KEYS.peek) === true;
 export const savePeek = (peek: boolean) => write(KEYS.peek, peek);
+
+// Display choices live apart from KEYS, so a progress reset keeps them.
+const DIFFICULTY_KEY = "ba26-difficulty";
+export const saveDifficulty = (difficulty: Difficulty) => write(DIFFICULTY_KEY, difficulty);
+export function loadDifficulty(): Difficulty {
+  const value = read(DIFFICULTY_KEY);
+  return DIFFICULTIES.find((difficulty) => difficulty === value) ?? "medium";
+}
+
+const MOTION_KEY = "ba26-motion";
+export const loadMotionChoice = () => read(MOTION_KEY) === true;
+export const saveMotionChoice = (allowed: boolean) => write(MOTION_KEY, allowed);
 
 export function clearProgress(): void {
   for (const key of Object.values(KEYS)) {

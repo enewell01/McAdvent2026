@@ -6,6 +6,15 @@ type Random = () => number;
 type Painter = (x: number, y: number, random: Random) => string;
 export type Skin = ChallengeType | "locked";
 
+export interface SceneAnchors {
+  lights: { x: number; y: number; color: string }[];
+  stars: { x: number; y: number }[];
+  smoke: { x: number; y: number };
+  moon: { x: number; y: number };
+}
+
+const BULBS = ["#ff4b3e", "#7ed957", "#f2c14e", "#5bb8ff"];
+
 function seeded(seed: number): Random {
   return () => {
     seed = (seed + 0x6d2b79f5) | 0;
@@ -118,6 +127,53 @@ function jaggedEdge(colors: string[], seed: number): string {
   return paintTile((x, y, r) => (y < depth[x] ? pick(r, colors) : ""), seed, 32, 6);
 }
 
+function sprite(rows: string[], palette: Record<string, string>): string {
+  return paintTile((x, y) => palette[rows[y][x]] ?? "", 1, rows[0].length, rows.length);
+}
+
+// One frame of a string of lights. The two frames light alternate bulbs.
+function lightString(frame: number): string {
+  const wire = (x: number) => 1 + Math.round(3 * Math.sin((Math.PI * x) / 40));
+  const bulbs = [5, 15, 25, 35].map((x, i) => ({ x, y: wire(x) + 1, color: BULBS[i], lit: i % 2 === frame }));
+  return paintTile((x, y) => {
+    if (y === wire(x)) return "#2f6b3a";
+    for (const bulb of bulbs) {
+      const dx = x - bulb.x;
+      const dy = y - bulb.y;
+      if ((dx === 0 || dx === 1) && dy >= 0 && dy < 3) return dy === 0 ? "#2f6b3a" : bulb.color;
+      if (bulb.lit && dx >= -2 && dx <= 3 && dy >= 0 && dy <= 5) return `${bulb.color}44`;
+    }
+    return "";
+  }, 1, 40, 12);
+}
+
+const BOW = [
+  "RRR.....RRR",
+  "RrRR...RRrR",
+  "RrrRRGRRrrR",
+  "RrrRGGGRrrR",
+  "RrRR.R.RRrR",
+  "RRR..R..RRR",
+  "....R.R....",
+  "...R...R...",
+];
+
+const HOLLY = [
+  "..GG...GG..",
+  ".GGGG.GGGG.",
+  "GGGGGRGGGGG",
+  ".GGGRRRGGG.",
+  "..G..R..G..",
+];
+
+export function installFestiveArt(root: HTMLElement): void {
+  root.style.setProperty("--lights-a", lightString(0));
+  root.style.setProperty("--lights-b", lightString(1));
+  root.style.setProperty("--bow", sprite(BOW, { R: "#d63a33", r: "#8f1f1b", G: "#f2c14e" }));
+  root.style.setProperty("--holly-sprig", sprite(HOLLY, { G: "#2fa05a", R: "#e0372f" }));
+  root.style.setProperty("--edge-snow", jaggedEdge(["#f4f8fb", "#e6eef4"], 13));
+}
+
 export function installRockLayers(root: HTMLElement): void {
   const dirt = ["#33241a", "#2d1f16", "#392919"];
   const rock = ["#2b2e36", "#262930", "#30333c"];
@@ -131,12 +187,13 @@ export function installRockLayers(root: HTMLElement): void {
 
 const SKY = ["#10163a", "#141c48", "#1a2558", "#213068", "#2b4078", "#355684", "#42708c"];
 
-export function drawScene(canvas: HTMLCanvasElement): void {
+export function drawScene(canvas: HTMLCanvasElement): SceneAnchors {
   const rect = canvas.getBoundingClientRect();
   const W = (canvas.width = Math.ceil(rect.width / 4));
   const H = (canvas.height = Math.ceil(rect.height / 4));
   const ctx = canvas.getContext("2d");
-  if (!ctx || W === 0 || H === 0) return;
+  const anchors: SceneAnchors = { lights: [], stars: [], smoke: { x: 0, y: 0 }, moon: { x: 0, y: 0 } };
+  if (!ctx || W === 0 || H === 0) return anchors;
   const random = seeded(2026);
   const fill = (color: string, x: number, y: number, w: number, h: number) => {
     ctx.fillStyle = color;
@@ -155,7 +212,9 @@ export function drawScene(canvas: HTMLCanvasElement): void {
   });
 
   for (let i = 0; i < (W * H) / 180; i++) {
-    fill(random() < 0.2 ? "#ffffff" : "#8fa6d8", random() * W, random() * H * 0.6, 1, 1);
+    const star = { x: Math.round(random() * W), y: Math.round(random() * H * 0.6) };
+    fill(random() < 0.2 ? "#ffffff" : "#8fa6d8", star.x, star.y, 1, 1);
+    if (i % 5 === 0) anchors.stars.push(star);
   }
 
   // Aurora: stepped columns that fade downward
@@ -179,6 +238,7 @@ export function drawScene(canvas: HTMLCanvasElement): void {
   // A square moon, placed clear of the left-aligned title
   const moonSize = 18;
   const moonX = Math.round(W * 0.84);
+  anchors.moon = { x: moonX, y: 12 };
   fill("rgba(226,234,255,.12)", moonX - 3, 9, moonSize + 6, moonSize + 6);
   fill("#e8edf8", moonX, 12, moonSize, moonSize);
   fill("#c6d0e6", moonX + 3, 15, 4, 4);
@@ -198,14 +258,35 @@ export function drawScene(canvas: HTMLCanvasElement): void {
     return tops;
   }
 
-  function spruce(x: number, ground: number, height: number) {
+  const bulb = (x: number, y: number) => {
+    const color = BULBS[anchors.lights.length % BULBS.length];
+    anchors.lights.push({ x, y, color });
+  };
+
+  function spruce(x: number, ground: number, height: number, lit = false) {
     fill("#3a2616", x - 1, ground - 3, 2, 3);
     for (let step = 0; step < height; step++) {
       const y = ground - 3 - step * 2;
       const half = 1 + Math.floor(((height - step) * 3) / height) * 2;
       fill(step % 2 ? "#17403a" : "#0f2f2d", x - half, y - 2, half * 2, 2);
       fill("#dfeaf3", x - half, y - 2, half, 1);
+      if (lit) {
+        bulb(x - half + 1, y - 1);
+        bulb(x + half - 2, y - 1);
+        if (step % 2) bulb(x, y - 1);
+      }
     }
+  }
+
+  function christmasTree(x: number, ground: number, height: number) {
+    spruce(x, ground, height, true);
+    const top = ground - 5 - height * 2;
+    fill("#f2c14e", x - 2, top, 4, 2);
+    fill("#f2c14e", x - 1, top - 1, 2, 4);
+    fill("#c8322e", x - 9, ground - 3, 4, 3);
+    fill("#f2c14e", x - 8, ground - 3, 1, 3);
+    fill("#3f83ba", x + 5, ground - 4, 5, 4);
+    fill("#eef3f7", x + 7, ground - 4, 1, 4);
   }
 
   hills(H * 0.3, 11, 46, "#26365f", "#a8bbdc", 1.3);
@@ -231,8 +312,14 @@ export function drawScene(canvas: HTMLCanvasElement): void {
   fill("#ffcf5c", cx + 5, floor - 11, 8, 6);
   fill("#4a3220", cx + 8, floor - 11, 2, 6);
   fill("#2a1b10", cx + 16, floor - 8, 5, 8);
-  spruce(cx - 12, floor, 8);
-  spruce(cx + 40, front[cabinColumn + 10] ?? floor, 10);
-  spruce(Math.round(W * 0.12), front[Math.floor((W * 0.12) / 4)] ?? floor, 11);
-  spruce(Math.round(W * 0.2), front[Math.floor((W * 0.2) / 4)] ?? floor, 7);
+  fill("#1f6b3a", cx + 17, floor - 7, 3, 3);
+  fill("#e0372f", cx + 18, floor - 6, 1, 1);
+  for (let x = cx - 2; x < cx + 26; x += 3) bulb(x, floor - 13);
+  anchors.smoke = { x: cx + 19, y: floor - 27 };
+
+  spruce(cx - 12, floor, 8, true);
+  spruce(cx + 40, front[cabinColumn + 10] ?? floor, 10, true);
+  christmasTree(Math.round(W * 0.12), front[Math.floor((W * 0.12) / 4)] ?? floor, 11);
+  spruce(Math.round(W * 0.22), front[Math.floor((W * 0.22) / 4)] ?? floor, 7, true);
+  return anchors;
 }

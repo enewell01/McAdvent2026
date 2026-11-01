@@ -1,8 +1,9 @@
 # Blocky Advent 2026
 
 A Minecraft-styled Christmas advent calendar with one challenge a day from
-November 1 to December 25, 2026. Doors open by themselves at midnight in the
-viewer's local time, and future doors stay shut and hide their challenge type.
+November 1 to December 25, 2026, each at Easy, Medium and Hard. Doors open by
+themselves at midnight in the viewer's local time, and future doors stay shut
+and hide their challenge type.
 
 Built with Vite and vanilla TypeScript. There is no backend: progress is saved
 in the browser's localStorage.
@@ -43,15 +44,25 @@ social preview links stay correct whatever you call the repo. `REPO_NAME` in
 ## Editing challenges
 
 Challenges live in `src/challenges.ts`, in date order: the first entry is
-November 1 and the last is December 25. Keep the list at 55 entries, one per door.
+November 1 and the last is December 25. Keep the list at 55 entries, one per
+door, each with all three difficulties.
 
 ```ts
-{ title: "Cozy Cabin", challenge: "Build a spruce log cabin...", tip: "Hay bale under...", type: "build", difficulty: 1 },
+{
+  type: "build",
+  easy: { title: "Cozy Cabin", challenge: "Build a spruce log cabin...", tip: "Hay bale under..." },
+  medium: { title: "...", challenge: "...", tip: "..." },
+  hard: { title: "...", challenge: "...", tip: "..." },
+},
 ```
 
-- `type` sets the block texture and label: `build`, `survive`, `explore`, `ice`,
-  `redstone`, `nether` or `festive`.
-- `difficulty` is `1` (Easy), `2` (Medium) or `3` (Hard).
+`type` sets the block texture and label: `build`, `survive`, `explore`, `ice`,
+`redstone`, `nether` or `festive`.
+
+A door counts toward the XP bar once any of its three challenges is complete.
+
+The server address in the banner is in `index.html` and in `SERVER_ADDRESS` at
+the top of `src/main.ts`.
 
 ## Peeking
 
@@ -61,6 +72,12 @@ doors" toggle, set `PEEK_ENABLED` to `true` at the top of `src/main.ts`.
 The lock is there to keep the surprise, not to keep a secret. This is a static
 site, so all the challenges ship to the browser, and changing the device clock
 opens more doors.
+
+## Animations
+
+Snow, twinkling lights and the sleigh follow the device's reduced-motion setting.
+People with it on see a still page, plus a "Turn on snow and animations" button.
+On Windows the setting is Accessibility → Visual effects → Animation effects.
 
 ## Images
 
