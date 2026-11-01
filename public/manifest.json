@@ -1,0 +1,14 @@
+{
+  "name": "Blocky Advent 2026",
+  "short_name": "Blocky Advent",
+  "description": "One Christmas challenge a day for your Minecraft world.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#10163a",
+  "theme_color": "#10163a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Blocky Advent 2026</title>
+    <meta name="description" content="One Christmas challenge a day for your Minecraft world, from November 1 to Christmas Day." />
+    <meta name="theme-color" content="#10163a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Blocky Advent 2026" />
+    <meta property="og:description" content="One Christmas challenge a day for your Minecraft world, from November 1 to Christmas Day." />
+    <meta property="og:url" content="__SITE_URL__" />
+    <meta property="og:image" content="__SITE_URL__og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Blocky Advent 2026 in pixel lettering over a snowy night scene." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Blocky Advent 2026" />
+    <meta name="twitter:description" content="One Christmas challenge a day for your Minecraft world, from November 1 to Christmas Day." />
+    <meta name="twitter:image" content="__SITE_URL__og-image.png" />
+
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" />
+  </head>
+  <body>
+    <canvas id="snow" aria-hidden="true"></canvas>
+
+    <header class="hero">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="hero-text">
+        <h1>Blocky Advent 2026</h1>
+        <p class="lede">One Christmas challenge a day for your Minecraft world. Today's door glows gold. Open it, play it, then mark it complete to earn a level.</p>
+        <div class="hero-actions">
+          <button class="btn" id="share" type="button">Share today's challenge</button>
+          <p class="next-door" id="next-door"></p>
+        </div>
+        <label class="toggle" id="peek-toggle" for="peek" hidden><input type="checkbox" id="peek" /> Peek at future doors</label>
+      </div>
+    </header>
+
+    <main>
+      <section class="stratum dirt" aria-labelledby="november-heading">
+        <div class="wrap">
+          <h2 id="november-heading">November</h2>
+          <div class="grid" id="november"></div>
+          <ul class="legend" id="legend" aria-label="Challenge types"></ul>
+        </div>
+      </section>
+
+      <section class="stratum stone" aria-labelledby="december-heading">
+        <div class="wrap">
+          <h2 id="december-heading">December</h2>
+          <div class="grid" id="december"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="stratum deep">
+      <div class="wrap footer">
+        <div class="reset">
+          <button class="btn" id="reset" type="button">Reset progress</button>
+          <div class="reset-confirm" id="reset-confirm" hidden>
+            <span>Erase all your progress?</span>
+            <button class="btn danger" id="reset-yes" type="button">Yes, reset</button>
+            <button class="btn" id="reset-cancel" type="button">Keep progress</button>
+          </div>
+        </div>
+        <p>Works in Survival or Creative. Progress saves in this browser only.</p>
+        <p>Fan project. Not affiliated with Mojang or Microsoft.</p>
+      </div>
+    </footer>
+
+    <div class="hud">
+      <div class="xp">
+        <span class="xp-level" id="level">0</span>
+        <div class="xp-bar" id="xp-bar" role="progressbar" aria-label="Challenges completed" aria-valuemin="0" aria-valuemax="55" aria-valuenow="0"><div class="xp-fill" id="xp-fill"></div></div>
+        <span class="xp-caption" id="xp-caption">0 of 55 completed</span>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="door-dialog" aria-labelledby="dialog-title">
+      <div class="panel">
+        <div class="panel-top">
+          <span class="panel-date" id="dialog-date"></span>
+          <span class="chips"><span class="chip" id="dialog-type"></span><span class="chip diff" id="dialog-difficulty"></span></span>
+        </div>
+        <h3 id="dialog-title"></h3>
+        <p id="dialog-body"></p>
+        <p class="tip" id="dialog-tip"></p>
+        <div class="actions">
+          <button class="btn" id="dialog-close" type="button">Close</button>
+          <button class="btn go" id="dialog-done" type="button">Mark complete</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="share-dialog" aria-labelledby="share-title">
+      <div class="panel">
+        <h3 id="share-title">Copy today's challenge</h3>
+        <p>Your browser blocked copying. Select the text below and copy it yourself.</p>
+        <textarea id="share-text" rows="5" readonly aria-labelledby="share-title"></textarea>
+        <div class="actions">
+          <button class="btn" id="share-close" type="button">Close</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
