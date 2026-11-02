@@ -2,6 +2,7 @@ import "./styles.css";
 import { DAYS, DIFFICULTIES, TYPE_LABELS, type ChallengeType } from "./challenges";
 import { celebrate, motionOff, startSceneFx, systemReducesMotion, updateSceneFx } from "./festive";
 import { drawScene, installFestiveArt, installRockLayers, skinFor } from "./pixels";
+import { drawShareCard } from "./sharecard";
 import { startSnow } from "./snow";
 import {
   clearProgress,
@@ -171,6 +172,7 @@ difficultyButton.addEventListener("click", () => {
   paintDifficulty();
   fillChallenge();
   paint();
+  refreshShareImage();
 });
 paintDifficulty();
 
@@ -219,11 +221,48 @@ wireCopyButtons();
 const shareDialog = el<HTMLDialogElement>("share-dialog");
 const shareText = el<HTMLTextAreaElement>("share-text");
 
+// Phones only open the share sheet straight after a tap, so the picture is drawn
+// ahead of time and not when the button is pressed.
+let shareImage: Promise<File | null> = Promise.resolve(null);
+
+function refreshShareImage() {
+  const today = Math.min(todayIndex(), DOOR_COUNT - 1);
+  if (today < 0) return;
+  const { title, challenge } = DAYS[today][difficulty];
+  shareImage = drawShareCard(
+    {
+      day: today + 1,
+      date: dates[today].toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" }),
+      title,
+      challenge,
+      type: TYPE_LABELS[DAYS[today].type],
+      level: difficulty,
+      sleeps: DOOR_COUNT - 1 - today,
+      site: `${location.host}${location.pathname}`.replace(/\/$/, ""),
+    },
+    el<HTMLCanvasElement>("scene"),
+  ).catch(() => null);
+}
+
 shareButton.addEventListener("click", async () => {
   const today = Math.min(todayIndex(), DOOR_COUNT - 1);
   if (today < 0) return;
   const { title, challenge } = DAYS[today][difficulty];
   const text = `Day ${today + 1}: ${title} – ${challenge}\n${location.origin}${location.pathname}`;
+
+  if ("share" in navigator) {
+    const image = await shareImage;
+    const data: ShareData = { title: "Blocky Advent 2026", text };
+    if (image && navigator.canShare?.({ files: [image] })) data.files = [image];
+    try {
+      await navigator.share(data);
+      return;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      // Falls through to copying the text.
+    }
+  }
+
   if (await copyText(text)) {
     toast("Copied");
   } else {
@@ -273,6 +312,7 @@ function checkDay() {
   if (today !== lastToday) {
     lastToday = today;
     paint();
+    refreshShareImage();
     if (today >= 0 && today < DOOR_COUNT) toast(`Day ${today + 1} is open`);
   }
   paintCountdown();
@@ -313,6 +353,7 @@ function redrawScene() {
 }
 addEventListener("resize", redrawScene);
 redrawScene();
+refreshShareImage();
 
 startSceneFx(sceneFx);
 startSnow(el<HTMLCanvasElement>("snow"), el("xp-bar"), todayIndex() === DOOR_COUNT - 1);

@@ -286,6 +286,7 @@ h2::before { content: ""; width: 33px; height: 15px; background: var(--holly-spr
 .btn.go:hover { background: #3a7a28; }
 .btn.danger { background: #96241f; }
 .btn.danger:hover { background: #ad2c26; }
+.btn .icon { width: 15px; height: 18px; margin-right: 10px; vertical-align: -3px; fill: currentColor; }
 .btn.level { text-transform: capitalize; }
 .btn.level[data-level="easy"] { background: #2f6420; }
 .btn.level[data-level="medium"] { background: #8a5a00; }
