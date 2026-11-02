@@ -31,8 +31,15 @@
     <canvas id="snow" aria-hidden="true"></canvas>
 
     <section class="join" aria-label="Join the server">
-      <p>Join the server at <strong>AdventCraft.ooguy.com</strong></p>
-      <button class="btn small" id="copy-server" type="button">Copy address</button>
+      <div class="join-row">
+        <p>Java: <strong>AdventCraft.ooguy.com</strong></p>
+        <button class="btn small" type="button" data-copy="AdventCraft.ooguy.com" aria-label="Copy the Java address">Copy</button>
+      </div>
+      <div class="join-row">
+        <p>Bedrock: <strong>AdventCraft.wdn.gg</strong> port <strong>443</strong></p>
+        <button class="btn small" type="button" data-copy="AdventCraft.wdn.gg" aria-label="Copy the Bedrock address">Copy</button>
+      </div>
+      <a class="join-link" href="bedrock.html">Playing on console?</a>
     </section>
 
     <header class="hero">
@@ -55,12 +62,6 @@
       <section class="stratum dirt" aria-labelledby="november-heading">
         <div class="lights" aria-hidden="true"></div>
         <div class="wrap">
-          <fieldset class="difficulty">
-            <legend>Difficulty</legend>
-            <label data-level="easy"><input type="radio" name="difficulty" value="easy" /><span>Easy</span></label>
-            <label data-level="medium"><input type="radio" name="difficulty" value="medium" /><span>Medium</span></label>
-            <label data-level="hard"><input type="radio" name="difficulty" value="hard" /><span>Hard</span></label>
-          </fieldset>
           <h2 id="november-heading">November</h2>
           <div class="grid" id="november"></div>
           <ul class="legend" id="legend" aria-label="Challenge types"></ul>
@@ -106,14 +107,11 @@
         <canvas id="burst" aria-hidden="true"></canvas>
         <div class="panel-top">
           <span class="panel-date" id="dialog-date"></span>
-          <span class="chips"><span class="chip" id="dialog-type"></span></span>
+          <span class="chips">
+            <span class="chip" id="dialog-type"></span>
+            <button class="btn small level" id="dialog-difficulty" type="button"></button>
+          </span>
         </div>
-        <fieldset class="difficulty">
-          <legend>Difficulty</legend>
-          <label data-level="easy"><input type="radio" name="dialog-difficulty" value="easy" /><span>Easy</span></label>
-          <label data-level="medium"><input type="radio" name="dialog-difficulty" value="medium" /><span>Medium</span></label>
-          <label data-level="hard"><input type="radio" name="dialog-difficulty" value="hard" /><span>Hard</span></label>
-        </fieldset>
         <h3 id="dialog-title"></h3>
         <p id="dialog-body"></p>
         <p class="tip" id="dialog-tip"></p>

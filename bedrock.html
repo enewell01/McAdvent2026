@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Join on Console | Blocky Advent 2026</title>
+    <meta name="description" content="How to join the AdventCraft server from Xbox, PlayStation or Nintendo Switch with the BedrockTogether app." />
+    <meta name="theme-color" content="#10163a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Join on Console | Blocky Advent 2026" />
+    <meta property="og:description" content="How to join the AdventCraft server from Xbox, PlayStation or Nintendo Switch with the BedrockTogether app." />
+    <meta property="og:url" content="__SITE_URL__bedrock.html" />
+    <meta property="og:image" content="__SITE_URL__og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" />
+  </head>
+  <body>
+    <canvas id="snow" aria-hidden="true"></canvas>
+
+    <header class="guide-hero">
+      <div class="wrap">
+        <a class="back" href="./">Back to the calendar</a>
+        <h1>Join on Console</h1>
+        <p class="lede">Consoles can't type in a server address, so the free BedrockTogether phone app passes it to your console for you.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="stratum dirt" aria-labelledby="details-heading">
+        <div class="lights" aria-hidden="true"></div>
+        <div class="wrap guide">
+          <h2 id="details-heading">Server details</h2>
+          <dl class="server-card">
+            <div>
+              <dt>Address</dt>
+              <dd>AdventCraft.wdn.gg</dd>
+              <dd><button class="btn small" type="button" data-copy="AdventCraft.wdn.gg" aria-label="Copy the address">Copy</button></dd>
+            </div>
+            <div>
+              <dt>Port</dt>
+              <dd>443</dd>
+              <dd><button class="btn small" type="button" data-copy="443" aria-label="Copy the port">Copy</button></dd>
+            </div>
+          </dl>
+          <p>On Windows, iPhone, iPad or Android, you don't need the app. In Minecraft, open Play, then Servers, add a server and enter these details.</p>
+
+          <h2>Before you start</h2>
+          <ul>
+            <li>Install <a href="https://bedrocktogether.net/">BedrockTogether</a> on your phone from the App Store or Google Play.</li>
+            <li>Update Minecraft on your console.</li>
+            <li>Put your phone and console on the same Wi-Fi network. It can't be a guest network, and your phone's mobile data should be off.</li>
+            <li>Turn off any VPN on your phone.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="stratum stone" aria-labelledby="xbox-heading">
+        <div class="lights" aria-hidden="true"></div>
+        <div class="wrap guide">
+          <h2 id="xbox-heading">Xbox and PlayStation</h2>
+          <ol>
+            <li>Open BedrockTogether and stay on the PlayStation · Xbox tab.</li>
+            <li>Enter the address and port from above.</li>
+            <li>Tap Watch Ad and Run. Keep the app open and your phone awake.</li>
+            <li>On your console, open Minecraft, select Play, then the Worlds tab.</li>
+            <li>Select the server. It appears as a LAN game.</li>
+            <li>Once you've loaded in, you can close the app.</li>
+          </ol>
+
+          <h2>Nintendo Switch</h2>
+          <p>Switch can't see LAN games, so the app broadcasts the server through a separate Xbox account. This method is still in beta.</p>
+          <p class="warning">Use a spare Microsoft account, never your main one. BedrockTogether warns that broadcasting may break Xbox's terms and the account could be banned.</p>
+          <ol>
+            <li>Create the spare Microsoft account and give it a gamertag at xbox.com.</li>
+            <li>From your Switch, add that gamertag as a friend.</li>
+            <li>In BedrockTogether, open the Switch · Friends tab and enter the address and port from above.</li>
+            <li>Tap Sign in and Broadcast, read the warning, and sign in with the spare account.</li>
+            <li>Tap Broadcast to Friends.</li>
+            <li>On your Switch, open Minecraft, select Play, then the Friends tab, and join the spare account's game.</li>
+            <li>When you've finished playing, tap Stop Broadcast.</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="stratum deep guide-footer">
+      <div class="wrap guide">
+        <h2>If it doesn't work</h2>
+        <ul>
+          <li><strong>The server isn't listed:</strong> check that your phone and console show the same Wi-Fi name, and keep the app open until you've joined.</li>
+          <li><strong>On iPhone:</strong> allow Local Network access for BedrockTogether in Settings.</li>
+          <li><strong>On Android:</strong> exclude the app from battery optimization.</li>
+          <li><strong>Still not listed:</strong> your router may be blocking devices from seeing each other. Turn off AP isolation or use the Nintendo Switch method, which also works on other consoles.</li>
+          <li><strong>Unable to connect to world:</strong> check the port is 443, then update Minecraft.</li>
+        </ul>
+        <p>More fixes are in the <a href="https://bedrocktogether.net/troubleshooting/">BedrockTogether troubleshooting guide</a>.</p>
+        <div class="footer">
+          <p>BedrockTogether is a third-party app and isn't part of this site.</p>
+          <p>Fan project. Not affiliated with Mojang or Microsoft.</p>
+        </div>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/src/bedrock.ts"></script>
+  </body>
+</html>

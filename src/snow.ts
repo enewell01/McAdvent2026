@@ -14,7 +14,7 @@ const FLAKE_AREA = 12000; // Screen area per flake
 
 // Snow falls in three depths on a slowly shifting wind, and close flakes settle
 // on top of the element passed as `ledge`, the XP bar. Christmas Day snows harder.
-export function startSnow(canvas: HTMLCanvasElement, ledge: HTMLElement, heavy: boolean): void {
+export function startSnow(canvas: HTMLCanvasElement, ledge: HTMLElement | null, heavy: boolean): void {
   if (motionOff()) return;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -43,6 +43,7 @@ export function startSnow(canvas: HTMLCanvasElement, ledge: HTMLElement, heavy: 
     height = canvas.height = innerHeight;
     const count = Math.round(((width * height) / FLAKE_AREA) * (heavy ? 2 : 1));
     flakes = Array.from({ length: count }, () => spawn(Math.random() * height));
+    if (!ledge) return;
     const rect = ledge.getBoundingClientRect();
     ledgeLeft = rect.left;
     ledgeTop = rect.top;

@@ -51,6 +51,9 @@ body {
 }
 .join p { margin: 0; }
 .join strong { font-weight: 400; color: var(--gold); }
+.join-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; }
+.join-link { color: var(--snow); text-underline-offset: 3px; }
+.join-link:hover { color: var(--gold); }
 .btn.small { padding: 2px 10px; font-size: 18px; }
 
 /* Hero */
@@ -125,27 +128,6 @@ h2 {
   color: var(--gold);
   text-shadow: 2px 2px 0 var(--ink);
 }
-
-/* Difficulty switch */
-.difficulty { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 22px; padding: 0; border: 0; min-inline-size: 0; }
-.difficulty legend { float: left; margin-right: 6px; padding: 0; font-size: 20px; }
-.difficulty label { cursor: pointer; }
-.difficulty input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.difficulty span {
-  display: block;
-  padding: 4px 14px;
-  font-size: 20px;
-  color: var(--snow);
-  background: #4d4d4d;
-  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .4), inset 2px 2px 0 rgba(255, 255, 255, .15), 0 0 0 2px var(--ink);
-}
-.difficulty input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 3px; }
-[data-level="easy"] input:checked + span { background: #2f6420; }
-[data-level="medium"] input:checked + span { background: #8a5a00; }
-[data-level="hard"] input:checked + span { background: #96241f; }
-.difficulty input:checked + span { box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .4), inset -2px -2px 0 rgba(255, 255, 255, .15), 0 0 0 2px var(--snow); }
-.panel .difficulty { margin: 0; }
-.panel .difficulty input:checked + span { box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .4), 0 0 0 2px var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
 
 h2::before { content: ""; width: 33px; height: 15px; background: var(--holly-sprig) center / 100% 100%; image-rendering: pixelated; }
 
@@ -304,6 +286,10 @@ h2::before { content: ""; width: 33px; height: 15px; background: var(--holly-spr
 .btn.go:hover { background: #3a7a28; }
 .btn.danger { background: #96241f; }
 .btn.danger:hover { background: #ad2c26; }
+.btn.level { text-transform: capitalize; }
+.btn.level[data-level="easy"] { background: #2f6420; }
+.btn.level[data-level="medium"] { background: #8a5a00; }
+.btn.level[data-level="hard"] { background: #96241f; }
 
 /* Dialogs */
 dialog {
@@ -336,6 +322,26 @@ dialog::backdrop { background: rgba(5, 8, 14, .74); }
 .footer p { margin: 0; }
 .reset { margin-bottom: 8px; }
 .reset-confirm { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--snow); }
+
+/* Bedrock Together page */
+.guide-hero { background: var(--night); padding-block: 28px 44px; }
+.guide-hero .wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.back { color: var(--gold); text-underline-offset: 3px; }
+.guide { display: flex; flex-direction: column; gap: 14px; max-width: 760px; text-shadow: 1px 1px 0 var(--ink); }
+.guide h2 { margin: 18px 0 0; }
+.guide h2:first-child { margin-top: 0; }
+.guide p { margin: 0; }
+.guide ul, .guide ol { margin: 0; padding-inline-start: 1.4em; display: flex; flex-direction: column; gap: 8px; }
+.guide li::marker { color: var(--gold); }
+.guide strong { font-weight: 400; color: var(--gold); }
+.guide a { color: var(--gold); text-underline-offset: 3px; }
+.server-card { margin: 0; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; background: rgba(10, 13, 18, .82); box-shadow: 0 0 0 2px var(--ink); }
+.server-card div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.server-card dt { min-width: 3.6em; color: var(--frost); }
+.server-card dd { margin: 0; color: var(--gold); overflow-wrap: anywhere; }
+.warning { padding: 8px 12px; background: rgba(150, 36, 31, .92); box-shadow: 0 0 0 2px var(--ink); }
+.guide-footer { padding-block-end: 44px; }
+.guide .footer { margin-top: 14px; }
 
 .toast {
   position: fixed;

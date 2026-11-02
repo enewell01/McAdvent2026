@@ -1,5 +1,5 @@
 import "./styles.css";
-import { DAYS, DIFFICULTIES, TYPE_LABELS, type ChallengeType, type Difficulty } from "./challenges";
+import { DAYS, DIFFICULTIES, TYPE_LABELS, type ChallengeType } from "./challenges";
 import { celebrate, motionOff, startSceneFx, systemReducesMotion, updateSceneFx } from "./festive";
 import { drawScene, installFestiveArt, installRockLayers, skinFor } from "./pixels";
 import { startSnow } from "./snow";
@@ -16,6 +16,7 @@ import {
   saveOpened,
   savePeek,
 } from "./storage";
+import { copyText, toast, wireCopyButtons } from "./ui";
 
 // Future doors stay shut until their date. Set to true to bring back the
 // "Peek at future doors" toggle.
@@ -23,7 +24,6 @@ const PEEK_ENABLED = false;
 
 const YEAR = 2026;
 const DOOR_COUNT = DAYS.length;
-const SERVER_ADDRESS = "AdventCraft.ooguy.com";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const dates = DAYS.map((_, i) => new Date(YEAR, 10, 1 + i));
 
@@ -33,7 +33,6 @@ const dialog = el<HTMLDialogElement>("door-dialog");
 const doneButton = el<HTMLButtonElement>("dialog-done");
 const shareButton = el<HTMLButtonElement>("share");
 const peekInput = el<HTMLInputElement>("peek");
-const toastEl = el("toast");
 const burst = el<HTMLCanvasElement>("burst");
 
 let opened = loadOpened(DOOR_COUNT);
@@ -55,14 +54,6 @@ const isLocked = (door: number) => door > todayIndex() && !peek;
 const isDoorDone = (door: number) => DIFFICULTIES.some((level) => done.has(doneKey(door, level)));
 const shortDate = (door: number) =>
   dates[door].toLocaleDateString("en-CA", { month: "long", day: "numeric" });
-
-let toastTimer = 0;
-function toast(message: string) {
-  toastEl.textContent = message;
-  toastEl.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => toastEl.classList.remove("show"), 2600);
-}
 
 // Doors are built once and updated in place, so keyboard focus survives updates.
 const doors = DAYS.map((_, i) => {
@@ -165,21 +156,23 @@ function syncDoneButton() {
   doneButton.textContent = done.has(doneKey(currentDoor, difficulty)) ? "Mark not done" : "Mark complete";
 }
 
-// The page and the dialog each have a difficulty switch, and they stay in step.
-const difficultyInputs = [...document.querySelectorAll<HTMLInputElement>(".difficulty input")];
+// The button in the dialog's corner steps through Easy, Medium and Hard.
+const difficultyButton = el<HTMLButtonElement>("dialog-difficulty");
 
-function setDifficulty(next: Difficulty) {
-  difficulty = next;
-  saveDifficulty(next);
-  for (const input of difficultyInputs) input.checked = input.value === next;
-  if (dialog.open) fillChallenge();
+function paintDifficulty() {
+  difficultyButton.textContent = difficulty;
+  difficultyButton.dataset.level = difficulty;
+  difficultyButton.setAttribute("aria-label", `Difficulty: ${difficulty}. Change difficulty`);
+}
+
+difficultyButton.addEventListener("click", () => {
+  difficulty = DIFFICULTIES[(DIFFICULTIES.indexOf(difficulty) + 1) % DIFFICULTIES.length];
+  saveDifficulty(difficulty);
+  paintDifficulty();
+  fillChallenge();
   paint();
-}
-
-for (const input of difficultyInputs) {
-  input.checked = input.value === difficulty;
-  input.addEventListener("change", () => setDifficulty(input.value as Difficulty));
-}
+});
+paintDifficulty();
 
 doneButton.addEventListener("click", () => {
   const key = doneKey(currentDoor, difficulty);
@@ -221,30 +214,7 @@ function openFromHash() {
 }
 addEventListener("hashchange", openFromHash);
 
-async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const area = document.createElement("textarea");
-    area.value = text;
-    area.className = "offscreen";
-    document.body.append(area);
-    area.select();
-    let copied = false;
-    try {
-      copied = document.execCommand("copy");
-    } catch {
-      // Falls through to the manual copy dialog.
-    }
-    area.remove();
-    return copied;
-  }
-}
-
-el("copy-server").addEventListener("click", async () => {
-  toast((await copyText(SERVER_ADDRESS)) ? "Copied" : `Copy failed. The address is ${SERVER_ADDRESS}`);
-});
+wireCopyButtons();
 
 const shareDialog = el<HTMLDialogElement>("share-dialog");
 const shareText = el<HTMLTextAreaElement>("share-text");

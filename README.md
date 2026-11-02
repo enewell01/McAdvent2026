@@ -61,8 +61,8 @@ door, each with all three difficulties.
 
 A door counts toward the XP bar once any of its three challenges is complete.
 
-The server address in the banner is in `index.html` and in `SERVER_ADDRESS` at
-the top of `src/main.ts`.
+The server addresses are in the join banner in `index.html` and in the server
+details in `bedrock.html`, which is the guide for joining from a console.
 
 ## Peeking
 

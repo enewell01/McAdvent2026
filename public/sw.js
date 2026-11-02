@@ -3,7 +3,7 @@ const VERSION = "__VERSION__";
 const FILES = ["__FILES__"];
 const CACHE = `blocky-advent-${VERSION}`;
 const FONT_CACHE = "blocky-advent-fonts";
-const SHELL = [".", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png"];
+const SHELL = [".", "index.html", "bedrock.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   const files = [...new Set([...SHELL, ...FILES])];

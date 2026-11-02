@@ -43,4 +43,5 @@ function precacheManifest(): Plugin {
 export default defineConfig({
   base,
   plugins: [siteUrlInHtml(), precacheManifest()],
+  build: { rollupOptions: { input: ["index.html", "bedrock.html"] } },
 });
